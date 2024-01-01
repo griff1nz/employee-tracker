@@ -1,10 +1,11 @@
 const inquirer = require('inquirer');
 const mysql2 = require('mysql2');
+require('dotenv').config();
 
 const connection = mysql2.createConnection({
     host: 'localhost', 
     user: 'root',
-    password: '',
+    password: process.env.DB_PASSWORD,
     database: 'company_db'
 });
 const viewEmployees = () => {
