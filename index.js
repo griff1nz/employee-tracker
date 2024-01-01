@@ -5,11 +5,20 @@ require('dotenv').config();
 const connection = mysql2.createConnection({
     host: 'localhost', 
     user: 'root',
-    password: process.env.DB_PASSWORD,
+    password: process.env.DB_PASSWORD, //I am using environmental variables for the purpose of hiding my password
     database: 'company_db'
 });
 const viewEmployees = () => {
-    console.log('World');
+    connection.query(
+        'SELECT * FROM employee',
+        function(err,results,fields) {
+            console.table(results);
+            if(err) {
+                console.log(err);
+            }
+            runPrompts(questions);
+        }
+    )
 }
 const addEmployee = () => {
     console.log('Hello');
@@ -21,11 +30,11 @@ const viewRoles = () => {
     connection.query(
         'SELECT * FROM role',
         function(err, results, fields) {
-            console.log(results);
-            console.log(fields);
+            console.table(results);
             if (err) {
                 console.log(err);
             }
+            runPrompts(questions);
         }
     )
 }
@@ -86,6 +95,9 @@ inquirer
         }
         if (answers.options === 'Add Department') {
             addDepartment();
+        }
+        if (answers.options === 'View All Employees') {
+            viewEmployees();
         }
     })
 }

@@ -20,7 +20,7 @@ SET r.department_name = d.name
 WHERE r.department_id = d.id;
 
 INSERT INTO employee (first_name, last_name, role_id)
-VALUES ('Sally', 'Saleswoman', '1', '2'),
+VALUES ('Sally', 'Saleswoman', '1'),
 ('Mark', 'Mastermind', '2'),
 ('Mary', 'Mathematician', '3'),
 ('Alex', 'Accuracy', '4'),
@@ -28,3 +28,8 @@ VALUES ('Sally', 'Saleswoman', '1', '2'),
 ('Lisa', 'Legality', '6'),
 ('Dave', 'The Basement Dweller', '7'),
 ('Cody', 'Coder', '8');
+
+UPDATE employee e /*https://stackoverflow.com/questions/11168402/mysql-copy-selected-fields-from-one-table-to-another*/
+JOIN role r ON e.role_id = r.id
+SET e.role_name = r.title 
+WHERE e.role_id = r.id;
