@@ -26,8 +26,7 @@ CREATE TABLE employee (
     role_name VARCHAR(30),
     FOREIGN KEY (role_id)
     REFERENCES role(id), 
+    is_manager BOOLEAN,
     manager_id INT,
-    FOREIGN KEY (manager_id)
-    REFERENCES employee(id),
-    manager VARCHAR(60)
+    manager VARCHAR(60) NULL
 );
