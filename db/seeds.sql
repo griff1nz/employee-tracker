@@ -20,13 +20,13 @@ SET r.department_id = d.id
 WHERE r.department_name = d.name;
 
 INSERT INTO employee (first_name, last_name, role_name, is_manager, manager)
-VALUES ('Sally', 'Saleswoman', 'Salesperson', false, 'Mark Mastermind'),
+VALUES ('Sally', 'James', 'Salesperson', false, 'Mark Mastermind'),
 ('Mark', 'Mastermind', 'Sales Lead', true, NULL),
-('Mary', 'Mathematician', 'Accountant', false, 'Alex Accuracy'),
-('Alex', 'Accuracy', 'Account Manager', true, NULL),
-('Shigeru', 'Miyamoto', 'Cease And Desist Deliveryman', false, 'Lisa Legality'),
-('Lisa', 'Legality', 'CEO of Legality (Manager)', true, NULL),
-('Dave', 'The Basement Dweller', 'Software Engineer', false, 'Cody Coder'),
+('Max', 'Mathematician', 'Accountant', false, 'Alex Accountant'),
+('Alex', 'Accountant', 'Account Manager', true, NULL),
+('Shigeru', 'Miyamoto', 'Cease and Desist Deliveryman', false, 'Lisa Roger'),
+('Lisa', 'Roger', 'CEO of Legality', true, NULL),
+('Dave', 'Smith', 'Software Engineer', false, 'Cody Coder'),
 ('Cody', 'Coder', 'Software Manager', true, NULL);
 
 UPDATE employee e /*https://stackoverflow.com/questions/11168402/mysql-copy-selected-fields-from-one-table-to-another*/
@@ -34,7 +34,7 @@ JOIN role r ON e.role_name = r.title
 SET e.role_id = r.id 
 WHERE e.role_name = r.title;
 
-UPDATE employee e 
+UPDATE employee e /* Gets manager's id */
 SET e.manager_id = (
     SELECT id FROM (
         SELECT id, CONCAT(first_name, ' ', last_name) AS full_name

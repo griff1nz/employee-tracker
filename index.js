@@ -29,7 +29,6 @@ const addEmployee = () => {
             results.forEach((roleName) => {
                 roleList.push(roleName.title);
             });
-            console.log(roleList);
             if (err) {
                 console.log(err);
             }
@@ -41,7 +40,6 @@ const addEmployee = () => {
                 managerList.push(managerName.first_name + ' ' + managerName.last_name);
                 managerList.push("None");
             });
-            console.log(managerList);
             if (err) {
                 console.log(err);
             }
@@ -78,33 +76,34 @@ const addEmployee = () => {
     ])
         .then((answers) => {
             if (answers.managerAssignment === 'None') {
-                answers.managerAssignment = null;
+                answers.managerAssignment = '';
             }
-    connection.query(
-        `INSERT INTO employee (first_name, last_name, role_name, is_manager, manager)
+            connection.query(
+                `INSERT INTO employee (first_name, last_name, role_name, is_manager, manager)
         VALUES ('${answers.firstName}', '${answers.lastName}', '${answers.empRole}', ${answers.isManager}, '${answers.managerAssignment}');`,
-        function (err, results) {
-            if (err) {
-                console.log(err);
-            }
-        }
-    )})
-    .then(() => {
-    connection.query(
-        `UPDATE employee e
+                function (err, results) {
+                    if (err) {
+                        console.log(err);
+                    }
+                }
+            )
+        })
+        .then(() => {
+            connection.query(
+                `UPDATE employee e
         JOIN role r ON e.role_name = r.title
         SET e.role_id = r.id 
         WHERE e.role_name = r.title;`,
-        function(err, results) {
-            if (err) {
-                console.log(err);
-            }
-        }
-    )
-})
-.then(() => {
-    connection.query(
-        `UPDATE employee e 
+                function (err, results) {
+                    if (err) {
+                        console.log(err);
+                    }
+                }
+            )
+        })
+        .then(() => {
+            connection.query(
+                `UPDATE employee e 
         SET e.manager_id = (
             SELECT id FROM (
                 SELECT id, CONCAT(first_name, ' ', last_name) AS full_name
@@ -113,29 +112,88 @@ const addEmployee = () => {
             WHERE e2.full_name = e.manager
         )
         WHERE e.manager IS NOT NULL;`,
-        function(err, results) {
-            if(err) {
-                console.log(err);
-            }
-            console.log('Added employee to database');
-            runPrompts(questions);
-        }
-    )
-})
+                function (err, results) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    console.log('Added employee to database');
+                    runPrompts(questions);
+                }
+            )
+        })
 }
 const updateEmployee = () => {
     var roleList = [];
+    var employeeList = [];
+    connection.query(
+        'SELECT first_name, last_name FROM employee',
+        function (err, results) {
+            results.forEach((fullName) => {
+                employeeList.push(fullName.first_name + ' ' + fullName.last_name);
+            });
+            if (err) {
+                console.log(err);
+            }
+        }
+    );
     connection.query(
         'SELECT title FROM role',
         function (err, results) {
             results.forEach((roleName) => {
                 roleList.push(roleName.title);
             });
-            console.log(roleList);
             if (err) {
                 console.log(err);
             }
-        });
+        })
+    inquirer.prompt([
+        {
+            type: 'input',
+            message: 'Press enter to continue...', //Without this, inquirer will run before connection.query gets a chance to fetch data, and the choices for the next prompt will be an empty array
+            name: 'false'
+        },
+        {
+            type: 'list',
+            message: 'Select an employee to update:',
+            choices: employeeList,
+            name: 'employeeToUpdate'
+        },
+        {
+            type: 'list',
+            message: 'Select a new role for the employee:',
+            choices: roleList,
+            name: 'newEmployeeRole',
+        },
+    ])
+        .then((answers) => {
+            connection.query(
+                `UPDATE employee e
+            SET e.role_name = '${answers.newEmployeeRole}'
+            WHERE CONCAT(first_name, ' ', last_name) = '${answers.employeeToUpdate}';`
+            ),
+                function (err, results) {
+                    if (err) {
+                        console.log(err);
+                    }
+                }
+        }
+        )
+
+        .then(() => {
+            connection.query(
+                `UPDATE employee e
+        JOIN role r ON e.role_name = r.title
+        SET e.role_id = r.id 
+        WHERE e.role_name = r.title;`,
+                function (err, results) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    console.log('Updated employee');
+                    runPrompts(questions);
+                }
+            )
+        })
 }
 const viewRoles = () => {
     connection.query(
@@ -157,7 +215,6 @@ const addRole = () => {
             results.forEach((dept) => {
                 departmentList.push(dept.name);
             });
-            console.log(departmentList)
             if (err) {
                 console.log(err);
             }
@@ -192,7 +249,7 @@ const addRole = () => {
             )
         })
         .then(() => {
-            connection.query(
+            connection.query( //Change department id in the role table
                 `UPDATE role r 
             JOIN department d ON r.department_name = d.name
             SET r.department_id = d.id
@@ -253,7 +310,6 @@ const runPrompts = (prompts) => {
     inquirer
         .prompt(prompts)
         .then((answers) => {
-            console.log(answers);
             if (answers.options === 'View All Roles') {
                 viewRoles();
             }
@@ -271,6 +327,12 @@ const runPrompts = (prompts) => {
             }
             if (answers.options === 'Add Employee') {
                 addEmployee();
+            }
+            if (answers.options === 'Update Employee Role') {
+                updateEmployee();
+            }
+            if (answers.options === 'Quit') {
+                process.exit();
             }
         })
 }
